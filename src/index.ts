@@ -11,21 +11,21 @@ logger.info('Starting app');
 async function main() {
   const namespace = process.argv[2] || 'default';
 
-  logger.info(`--- Analisi Namespace: ${namespace} ---`);
+  logger.info(`--- Namespace Analysis: ${namespace} ---`);
 
   const input = {
     messages: [
-      new HumanMessage(`Controlla lo stato del namespace "${namespace}".
-      Dimmi se ci sono pod con errori o riavvii anomali.
-      Dai anche un'occhiata veloce allo stato dei nodi per vedere se il cluster è sano.`)
+      new HumanMessage(`Check the status of the namespace "${namespace}".
+      Tell me if there are pods with errors, abnormal restarts or other issues.
+      Also take a look at the node status to see if the cluster is healthy.`)
     ]
   };
 
   const result = await getAgent().invoke(input);
 
-  // L'ultimo messaggio della lista è la risposta finale dell'AI
+  // The last message in the list is the AI's final response
   const lastMessage = result.messages[result.messages.length - 1];
-  logger.info('\nREPORT AGENTE:');
+  logger.info('\nAGENT REPORT:');
   // eslint-disable-next-line no-console
   console.log(lastMessage?.content);
 }

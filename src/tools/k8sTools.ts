@@ -2,7 +2,7 @@ import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { k8sCoreApi } from '../cluster/k8sClient';
 
-// Tool per listare i pod in un namespace
+// Tool to list pods in a namespace
 export const listPodsTool = tool(
   async ({ namespace }) => {
     try {
@@ -20,19 +20,19 @@ export const listPodsTool = tool(
         })
       );
     } catch (e) {
-      return `Errore nel recupero pod: ${JSON.stringify(e)}`;
+      return `Error retrieving pods: ${JSON.stringify(e)}`;
     }
   },
   {
     name: 'list_pods',
-    description: 'Lista i pod in un namespace specifico per controllare lo stato e i riavvii.',
+    description: 'Lists pods in a specific namespace to check their status and restarts.',
     schema: z.object({
-      namespace: z.string().describe('Il namespace di kubernetes da analizzare')
+      namespace: z.string().describe('The kubernetes namespace to analyze')
     })
   }
 );
 
-// Tool per controllare i nodi (per problemi generali)
+// Tool to check nodes (for general issues)
 export const listNodesTool = tool(
   async () => {
     try {
@@ -44,12 +44,12 @@ export const listNodesTool = tool(
         }))
       );
     } catch (e) {
-      return `Errore nel recupero nodi: ${JSON.stringify(e)}`;
+      return `Error retrieving nodes: ${JSON.stringify(e)}`;
     }
   },
   {
     name: 'list_nodes',
-    description: 'Controlla lo stato dei nodi del cluster per problemi generali di infrastruttura.',
+    description: 'Checks the cluster node status for general infrastructure issues.',
     schema: z.object({})
   }
 );

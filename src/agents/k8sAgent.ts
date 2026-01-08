@@ -10,7 +10,7 @@ export const getAgent = () => {
 
   const tools = [listPodsTool, listNodesTool];
 
-  // Creiamo l'agente passandogli il modello e i tool
+  // Create the agent by passing it the model and tools
   return createAgent({
     model,
     tools
