@@ -17,6 +17,8 @@ async function main() {
     messages: [
       new HumanMessage(`Check the status of the namespace "${namespace}".
       Tell me if there are pods with errors, abnormal restarts or other issues.
+      If there are, tell me what they are and eventually how to fix them.
+      For the worst issue, analyze logs (eventually the previous instance) to understand what caused it
       Also take a look at the node status to see if the cluster is healthy.`)
     ]
   };
@@ -30,4 +32,8 @@ async function main() {
   console.log(lastMessage?.content);
 }
 
-main().catch(logger.error);
+main().catch((e: any) => {
+  // eslint-disable-next-line no-console
+  console.log(e);
+  logger.error(e);
+});

@@ -1,5 +1,5 @@
 import { createAgent } from 'langchain';
-import { listNodesTool, listPodsTool } from '../tools/k8sTools';
+import { listNodesTool, listPodsTool, readPodLogsTool } from '../tools/k8sTools';
 import { ChatAnthropic } from '@langchain/anthropic';
 
 export const getAgent = () => {
@@ -8,7 +8,7 @@ export const getAgent = () => {
     temperature: 0
   });
 
-  const tools = [listPodsTool, listNodesTool];
+  const tools = [listPodsTool, listNodesTool, readPodLogsTool];
 
   // Create the agent by passing it the model and tools
   return createAgent({
