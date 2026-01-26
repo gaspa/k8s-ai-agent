@@ -5,6 +5,7 @@ import { parseArgs } from './cli/parser';
 import { getDefaultCheckpointer } from './persistence/fileCheckpointer';
 import { getContextManager, listContexts, getCurrentContext, switchContext } from './cluster/contextManager';
 import { runChatMode } from './cli/chatMode';
+import { runTuiMode } from './cli/tuiMode';
 
 dotenv.config();
 
@@ -31,6 +32,17 @@ async function main() {
 
   // Initialize context manager (validates K8s connection)
   const contextManager = getContextManager(args.context);
+
+  // TUI mode
+  if (args.tui) {
+    logger.info('Entering TUI mode...');
+    await runTuiMode({
+      namespace: args.namespace,
+      context: contextManager.getCurrentContextName(),
+      modelSpec: args.model,
+    });
+    return;
+  }
 
   // Chat mode
   if (args.chat) {
