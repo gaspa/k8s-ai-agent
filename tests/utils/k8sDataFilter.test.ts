@@ -18,7 +18,7 @@ describe('k8sDataFilter', () => {
         spec: {
           containers: [
             {
-              name: 'main',
+              name: 'container-name',
               image: 'nginx:latest',
               resources: {
                 requests: { cpu: '100m', memory: '128Mi' },
@@ -36,7 +36,7 @@ describe('k8sDataFilter', () => {
           ],
           containerStatuses: [
             {
-              name: 'main',
+              name: 'container-name',
               ready: true,
               restartCount: 5,
               state: { running: { startedAt: '2024-01-01T00:00:00Z' } }
@@ -54,7 +54,7 @@ describe('k8sDataFilter', () => {
       expect(filtered.nodeName).toBe('node-1');
       expect(filtered.restarts).toBe(5);
       expect(filtered.containers).toHaveLength(1);
-      expect(filtered.containers[0]!.name).toBe('main');
+      expect(filtered.containers[0]!.name).toBe('container-name');
       expect(filtered.containers[0]!.image).toBe('nginx:latest');
       expect(filtered.containers[0]!.ready).toBe(true);
 
