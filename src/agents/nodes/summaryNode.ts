@@ -1,12 +1,9 @@
-import type { TriageIssue, TriageResult, DiagnosticStateType } from '../state';
+import type { TriageIssue, DiagnosticStateType } from '../state';
 import { IssueSeverity, type DiagnosticIssue, type DiagnosticReport, type HealthyResource } from '../../types/report';
+import type { SummaryInput } from '../../types/summary';
 import { formatReport } from '../../utils/reportFormatter';
 
-export interface SummaryInput {
-  namespace: string;
-  triageResult: TriageResult;
-  deepDiveFindings: string[];
-}
+export type { SummaryInput };
 
 // Map triage severity to report severity
 function mapSeverity(severity: 'critical' | 'warning'): IssueSeverity {
@@ -17,16 +14,17 @@ function mapSeverity(severity: 'critical' | 'warning'): IssueSeverity {
 function getSuggestedCommands(issue: TriageIssue): string[] {
   const commands: string[] = [];
   const { podName, namespace, containerName, reason } = issue;
-  const container = containerName || 'main';
+  const container = containerName;
+  const containerArgString = container ? ` -c ${container}` : '';
 
   // Always suggest describe
   commands.push(`kubectl describe pod ${podName} -n ${namespace}`);
 
   // Log commands based on issue type
   if (['CrashLoopBackOff', 'OOMKilled'].includes(reason)) {
-    commands.push(`kubectl logs ${podName} -n ${namespace} -c ${container} --previous`);
+    commands.push(`kubectl logs ${podName} -n ${namespace}${containerArgString} --previous`);
   }
-  commands.push(`kubectl logs ${podName} -n ${namespace} -c ${container} --tail=100`);
+  commands.push(`kubectl logs ${podName} -n ${namespace}${containerArgString} --tail=100`);
 
   // Additional commands based on reason
   if (reason === 'OOMKilled') {
