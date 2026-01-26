@@ -3,6 +3,7 @@ export interface CliArgs {
   context?: string | undefined;
   resume: boolean;
   chat: boolean;
+  tui: boolean;
   model?: string | undefined;
 }
 
@@ -12,6 +13,7 @@ export function parseArgs(args: string[]): CliArgs {
     context: undefined,
     resume: false,
     chat: false,
+    tui: false,
     model: undefined,
   };
 
@@ -45,6 +47,13 @@ export function parseArgs(args: string[]): CliArgs {
     // Handle --chat
     if (arg === '--chat') {
       result.chat = true;
+      i++;
+      continue;
+    }
+
+    // Handle --tui
+    if (arg === '--tui') {
+      result.tui = true;
       i++;
       continue;
     }

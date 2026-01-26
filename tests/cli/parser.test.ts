@@ -10,6 +10,7 @@ describe('CLI Parser', () => {
       expect(args.context).toBeUndefined();
       expect(args.resume).toBe(false);
       expect(args.chat).toBe(false);
+      expect(args.tui).toBe(false);
       expect(args.model).toBeUndefined();
     });
 
@@ -88,12 +89,19 @@ describe('CLI Parser', () => {
       expect(args.model).toBe('gpt-3.5-turbo');
     });
 
+    it('should parse --tui flag', () => {
+      const args = parseArgs(['--tui']);
+
+      expect(args.tui).toBe(true);
+    });
+
     it('should parse all flags together', () => {
-      const args = parseArgs(['monitoring', '--context', 'prod', '--chat', '--model', 'gpt-4', '--resume']);
+      const args = parseArgs(['monitoring', '--context', 'prod', '--chat', '--model', 'gpt-4', '--resume', '--tui']);
 
       expect(args.namespace).toBe('monitoring');
       expect(args.context).toBe('prod');
       expect(args.chat).toBe(true);
+      expect(args.tui).toBe(true);
       expect(args.model).toBe('gpt-4');
       expect(args.resume).toBe(true);
     });
