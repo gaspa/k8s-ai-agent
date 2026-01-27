@@ -1,7 +1,6 @@
 import * as dotenv from 'dotenv';
-import { getAgent } from './agents/k8sAgent';
-import { HumanMessage } from '@langchain/core/messages';
 import { getLogger } from '@fluidware-it/saddlebag';
+import { getDiagnosticGraph } from './agents/diagnosticGraph';
 
 dotenv.config();
 
@@ -12,24 +11,14 @@ async function main() {
   const namespace = process.argv[2] || 'default';
 
   logger.info(`--- Namespace Analysis: ${namespace} ---`);
+  logger.info('Using multi-phase diagnostic graph (Triage -> Deep Dive -> Summary)');
 
-  const input = {
-    messages: [
-      new HumanMessage(`Check the status of the namespace "${namespace}".
-      Tell me if there are pods with errors, abnormal restarts or other issues.
-      If there are, tell me what they are and eventually how to fix them.
-      For the worst issue, analyze logs (eventually the previous instance) to understand what caused it
-      Also take a look at the node status to see if the cluster is healthy.`)
-    ]
-  };
+  // Run the diagnostic graph
+  const result = await getDiagnosticGraph().invoke({ namespace });
 
-  const result = await getAgent().invoke(input);
-
-  // The last message in the list is the AI's final response
-  const lastMessage = result.messages[result.messages.length - 1];
-  logger.info('\nAGENT REPORT:');
-  // eslint-disable-next-line no-console
-  console.log(lastMessage?.content);
+  // The summary node already prints the formatted report
+  // Log completion
+  logger.info(`\nDiagnostic complete. Found ${result.issues.length} issue(s).`);
 }
 
 main().catch((e: any) => {
