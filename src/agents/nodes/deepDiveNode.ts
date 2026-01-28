@@ -15,7 +15,7 @@ async function investigateIssue(issue: TriageIssue): Promise<string> {
       namespace: issue.namespace,
       containerName: issue.containerName || 'main',
       previous,
-      tailLines: 50,
+      tailLines: 50
     });
 
     return `
@@ -56,6 +56,6 @@ export async function deepDiveNode(state: DiagnosticStateType): Promise<Partial<
   const findings = await Promise.all(issuesToInvestigate.map(issue => investigateIssue(issue)));
 
   return {
-    deepDiveFindings: findings,
+    deepDiveFindings: findings
   };
 }

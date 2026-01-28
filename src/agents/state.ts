@@ -25,43 +25,43 @@ export interface TriageResult {
 export const DiagnosticState = Annotation.Root({
   // Input
   namespace: Annotation<string>({
-    reducer: (_, y) => y,
+    reducer: (_, y) => y
   }),
 
   // LLM messages for conversation history
   messages: Annotation<BaseMessage[]>({
     reducer: (x, y) => x.concat(y),
-    default: () => [],
+    default: () => []
   }),
 
   // Triage phase results
   triageResult: Annotation<TriageResult | null>({
     reducer: (_, y) => y,
-    default: () => null,
+    default: () => null
   }),
 
   // Deep dive findings
   deepDiveFindings: Annotation<string[]>({
     reducer: (x, y) => x.concat(y),
-    default: () => [],
+    default: () => []
   }),
 
   // Final report data
   issues: Annotation<DiagnosticIssue[]>({
     reducer: (x, y) => x.concat(y),
-    default: () => [],
+    default: () => []
   }),
 
   healthyResources: Annotation<HealthyResource[]>({
     reducer: (x, y) => x.concat(y),
-    default: () => [],
+    default: () => []
   }),
 
   // Control flow
   needsDeepDive: Annotation<boolean>({
     reducer: (_, y) => y,
-    default: () => false,
-  }),
+    default: () => false
+  })
 });
 
 export type DiagnosticStateType = typeof DiagnosticState.State;

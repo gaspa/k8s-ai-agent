@@ -6,13 +6,12 @@ vi.mock('../../src/cluster/k8sClient', () => ({
     listNamespacedPod: vi.fn(),
     listNode: vi.fn(),
     listNamespacedEvent: vi.fn(),
-    readNamespacedPodLog: vi.fn(),
-  },
+    readNamespacedPodLog: vi.fn()
+  }
 }));
 
 import { createDiagnosticGraph, shouldDeepDive } from '../../src/agents/diagnosticGraph';
 import { k8sCoreApi } from '../../src/cluster/k8sClient';
-import type { DiagnosticStateType } from '../../src/agents/state';
 
 describe('diagnosticGraph', () => {
   beforeEach(() => {
@@ -24,11 +23,18 @@ describe('diagnosticGraph', () => {
       const state = {
         namespace: 'default',
         needsDeepDive: true,
-        triageResult: { issues: [{ podName: 'test', reason: 'CrashLoopBackOff', severity: 'critical' as const, namespace: 'default' }], healthyPods: [], nodeStatus: 'healthy' as const, eventsSummary: [] },
+        triageResult: {
+          issues: [
+            { podName: 'test', reason: 'CrashLoopBackOff', severity: 'critical' as const, namespace: 'default' }
+          ],
+          healthyPods: [],
+          nodeStatus: 'healthy' as const,
+          eventsSummary: []
+        },
         messages: [],
         deepDiveFindings: [],
         issues: [],
-        healthyResources: [],
+        healthyResources: []
       };
 
       expect(shouldDeepDive(state)).toBe('deep_dive');
@@ -42,7 +48,7 @@ describe('diagnosticGraph', () => {
         messages: [],
         deepDiveFindings: [],
         issues: [],
-        healthyResources: [],
+        healthyResources: []
       };
 
       expect(shouldDeepDive(state)).toBe('summary');
@@ -57,22 +63,25 @@ describe('diagnosticGraph', () => {
           {
             metadata: { name: 'healthy-pod', namespace: 'default' },
             spec: { containers: [{ name: 'main', image: 'nginx' }] },
-            status: { phase: 'Running', containerStatuses: [{ name: 'main', ready: true, restartCount: 0, state: { running: {} } }] },
-          },
-        ],
+            status: {
+              phase: 'Running',
+              containerStatuses: [{ name: 'main', ready: true, restartCount: 0, state: { running: {} } }]
+            }
+          }
+        ]
       } as any);
 
       vi.mocked(k8sCoreApi.listNode).mockResolvedValue({
         items: [
           {
             metadata: { name: 'node-1' },
-            status: { conditions: [{ type: 'Ready', status: 'True' }] },
-          },
-        ],
+            status: { conditions: [{ type: 'Ready', status: 'True' }] }
+          }
+        ]
       } as any);
 
       vi.mocked(k8sCoreApi.listNamespacedEvent).mockResolvedValue({
-        items: [],
+        items: []
       } as any);
 
       const graph = createDiagnosticGraph();
@@ -98,25 +107,25 @@ describe('diagnosticGraph', () => {
                   name: 'main',
                   ready: false,
                   restartCount: 10,
-                  state: { waiting: { reason: 'CrashLoopBackOff', message: 'Back-off restarting' } },
-                },
-              ],
-            },
-          },
-        ],
+                  state: { waiting: { reason: 'CrashLoopBackOff', message: 'Back-off restarting' } }
+                }
+              ]
+            }
+          }
+        ]
       } as any);
 
       vi.mocked(k8sCoreApi.listNode).mockResolvedValue({
         items: [
           {
             metadata: { name: 'node-1' },
-            status: { conditions: [{ type: 'Ready', status: 'True' }] },
-          },
-        ],
+            status: { conditions: [{ type: 'Ready', status: 'True' }] }
+          }
+        ]
       } as any);
 
       vi.mocked(k8sCoreApi.listNamespacedEvent).mockResolvedValue({
-        items: [],
+        items: []
       } as any);
 
       vi.mocked(k8sCoreApi.readNamespacedPodLog).mockResolvedValue('Error: Connection refused');

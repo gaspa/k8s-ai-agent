@@ -59,102 +59,100 @@ const CRITICAL_REASONS = ['CrashLoopBackOff', 'OOMKilled', 'FailedMount', 'Image
 const WARNING_EVENT_REASONS = ['BackOff', 'FailedScheduling', 'FailedCreate', 'Unhealthy'];
 const HIGH_RESTART_THRESHOLD = 3;
 
+function checkContainerIssues(pod: FilteredPod, podKey: string, seenPods: Set<string>, issues: TriageIssue[]): void {
+  for (const container of pod.containers) {
+    if (container.state && CRITICAL_REASONS.includes(container.state) && !seenPods.has(podKey)) {
+      seenPods.add(podKey);
+      issues.push({
+        podName: pod.name,
+        namespace: pod.namespace,
+        containerName: container.name,
+        reason: container.state,
+        severity: 'critical',
+        restarts: pod.restarts,
+        message: container.stateMessage
+      });
+    }
+  }
+}
+
+function checkPodStatusIssues(pod: FilteredPod, podKey: string, seenPods: Set<string>, issues: TriageIssue[]): void {
+  if (seenPods.has(podKey)) return;
+
+  if (pod.restarts >= HIGH_RESTART_THRESHOLD) {
+    issues.push({
+      podName: pod.name,
+      namespace: pod.namespace,
+      reason: 'HighRestartCount',
+      severity: 'warning',
+      restarts: pod.restarts
+    });
+    seenPods.add(podKey);
+    return;
+  }
+
+  if (pod.status === 'Pending') {
+    const scheduledCondition = pod.conditions?.find(c => c.type === 'PodScheduled');
+    issues.push({
+      podName: pod.name,
+      namespace: pod.namespace,
+      reason: 'Pending',
+      severity: 'warning',
+      message: scheduledCondition?.message || 'Pod is pending'
+    });
+    seenPods.add(podKey);
+    return;
+  }
+
+  if (pod.status === 'Failed') {
+    issues.push({
+      podName: pod.name,
+      namespace: pod.namespace,
+      reason: 'Failed',
+      severity: 'critical'
+    });
+    seenPods.add(podKey);
+  }
+}
+
+function checkEventIssues(events: FilteredEvent[], seenPods: Set<string>, issues: TriageIssue[]): void {
+  for (const event of events) {
+    if (event.involvedObject?.kind !== 'Pod') continue;
+
+    const podKey = `${event.involvedObject.namespace || 'default'}/${event.involvedObject.name}`;
+    if (seenPods.has(podKey)) continue;
+
+    const isCritical = CRITICAL_REASONS.includes(event.reason);
+    const isWarning = WARNING_EVENT_REASONS.includes(event.reason);
+
+    if (isCritical || isWarning) {
+      seenPods.add(podKey);
+      issues.push({
+        podName: event.involvedObject.name,
+        namespace: event.involvedObject.namespace || 'default',
+        reason: event.reason,
+        severity: isCritical ? 'critical' : 'warning',
+        message: event.message
+      });
+    }
+  }
+}
+
 export function extractTriageIssues(
   pods: FilteredPod[],
-  nodes: FilteredNode[],
+  _nodes: FilteredNode[],
   events: FilteredEvent[]
 ): TriageIssue[] {
   const issues: TriageIssue[] = [];
   const seenPods = new Set<string>();
 
-  // Check pods for issues
   for (const pod of pods) {
     const podKey = `${pod.namespace}/${pod.name}`;
-
-    // Check each container
-    for (const container of pod.containers) {
-      if (container.state && CRITICAL_REASONS.includes(container.state)) {
-        if (!seenPods.has(podKey)) {
-          seenPods.add(podKey);
-          issues.push({
-            podName: pod.name,
-            namespace: pod.namespace,
-            containerName: container.name,
-            reason: container.state,
-            severity: 'critical',
-            restarts: pod.restarts,
-            message: container.stateMessage,
-          });
-        }
-      }
-    }
-
-    // Check for high restart count (only if not already flagged for a critical issue)
-    if (!seenPods.has(podKey) && pod.restarts >= HIGH_RESTART_THRESHOLD) {
-      issues.push({
-        podName: pod.name,
-        namespace: pod.namespace,
-        reason: 'HighRestartCount',
-        severity: 'warning',
-        restarts: pod.restarts,
-      });
-      seenPods.add(podKey);
-    }
-
-    // Check for Pending status
-    if (!seenPods.has(podKey) && pod.status === 'Pending') {
-      const scheduledCondition = pod.conditions?.find(c => c.type === 'PodScheduled');
-      issues.push({
-        podName: pod.name,
-        namespace: pod.namespace,
-        reason: 'Pending',
-        severity: 'warning',
-        message: scheduledCondition?.message || 'Pod is pending',
-      });
-      seenPods.add(podKey);
-    }
-
-    // Check for Failed status
-    if (!seenPods.has(podKey) && pod.status === 'Failed') {
-      issues.push({
-        podName: pod.name,
-        namespace: pod.namespace,
-        reason: 'Failed',
-        severity: 'critical',
-      });
-      seenPods.add(podKey);
-    }
+    checkContainerIssues(pod, podKey, seenPods, issues);
+    checkPodStatusIssues(pod, podKey, seenPods, issues);
   }
 
-  // Check events for issues
-  for (const event of events) {
-    if (event.involvedObject?.kind !== 'Pod') continue;
-
-    const podKey = `${event.involvedObject.namespace || 'default'}/${event.involvedObject.name}`;
-
-    // Skip if pod already has a critical issue
-    if (seenPods.has(podKey)) continue;
-
-    if (CRITICAL_REASONS.includes(event.reason)) {
-      seenPods.add(podKey);
-      issues.push({
-        podName: event.involvedObject.name,
-        namespace: event.involvedObject.namespace || 'default',
-        reason: event.reason,
-        severity: 'critical',
-        message: event.message,
-      });
-    } else if (WARNING_EVENT_REASONS.includes(event.reason)) {
-      seenPods.add(podKey);
-      issues.push({
-        podName: event.involvedObject.name,
-        namespace: event.involvedObject.namespace || 'default',
-        reason: event.reason,
-        severity: 'warning',
-        message: event.message,
-      });
-    }
-  }
+  checkEventIssues(events, seenPods, issues);
 
   return issues;
 }
@@ -182,7 +180,7 @@ function getNodeStatus(nodes: FilteredNode[]): 'healthy' | 'warning' | 'critical
 
 export function analyzeTriageData(
   data: TriageData,
-  namespace: string
+  _namespace: string
 ): { triageResult: TriageResult; needsDeepDive: boolean } {
   const issues = extractTriageIssues(data.pods, data.nodes, data.events);
 
@@ -199,7 +197,7 @@ export function analyzeTriageData(
     issues,
     healthyPods,
     nodeStatus,
-    eventsSummary,
+    eventsSummary
   };
 
   // Need deep dive if there are any critical issues or warnings
@@ -216,7 +214,7 @@ export async function triageNode(state: DiagnosticStateType): Promise<Partial<Di
   const [podsResult, nodesResult, eventsResult] = await Promise.all([
     listPodsTool.invoke({ namespace }),
     listNodesTool.invoke({}),
-    listEventsTool.invoke({ namespace }),
+    listEventsTool.invoke({ namespace })
   ]);
 
   // Parse the results
@@ -246,6 +244,6 @@ export async function triageNode(state: DiagnosticStateType): Promise<Partial<Di
 
   return {
     triageResult,
-    needsDeepDive,
+    needsDeepDive
   };
 }

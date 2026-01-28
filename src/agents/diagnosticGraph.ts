@@ -22,7 +22,7 @@ export function createDiagnosticGraph() {
     .addEdge('__start__', 'triage')
     .addConditionalEdges('triage', shouldDeepDive, {
       deep_dive: 'deep_dive',
-      summary: 'summary',
+      summary: 'summary'
     })
     .addEdge('deep_dive', 'summary')
     .addEdge('summary', END);

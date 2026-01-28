@@ -16,14 +16,14 @@ describe('summaryNode', () => {
               reason: 'CrashLoopBackOff',
               severity: 'critical',
               restarts: 10,
-              message: 'Back-off 5m0s restarting failed container',
-            },
+              message: 'Back-off 5m0s restarting failed container'
+            }
           ],
           healthyPods: ['healthy-pod-1', 'healthy-pod-2'],
           nodeStatus: 'healthy',
-          eventsSummary: [],
+          eventsSummary: []
         },
-        deepDiveFindings: ['## Investigation: crash-pod\nError: Connection refused'],
+        deepDiveFindings: ['## Investigation: crash-pod\nError: Connection refused']
       };
 
       const report = buildDiagnosticReport(input);
@@ -43,9 +43,9 @@ describe('summaryNode', () => {
           issues: [],
           healthyPods: ['api-server', 'web-frontend', 'worker'],
           nodeStatus: 'healthy',
-          eventsSummary: [],
+          eventsSummary: []
         },
-        deepDiveFindings: [],
+        deepDiveFindings: []
       };
 
       const report = buildDiagnosticReport(input);
@@ -65,14 +65,14 @@ describe('summaryNode', () => {
               namespace: 'default',
               reason: 'OOMKilled',
               severity: 'critical',
-              message: 'Container killed due to OOM',
-            },
+              message: 'Container killed due to OOM'
+            }
           ],
           healthyPods: [],
           nodeStatus: 'healthy',
-          eventsSummary: [],
+          eventsSummary: []
         },
-        deepDiveFindings: [],
+        deepDiveFindings: []
       };
 
       const report = buildDiagnosticReport(input);
@@ -92,14 +92,14 @@ describe('summaryNode', () => {
               namespace: 'default',
               reason: 'HighRestartCount',
               severity: 'warning',
-              restarts: 5,
-            },
+              restarts: 5
+            }
           ],
           healthyPods: [],
           nodeStatus: 'healthy',
-          eventsSummary: [],
+          eventsSummary: []
         },
-        deepDiveFindings: [],
+        deepDiveFindings: []
       };
 
       const report = buildDiagnosticReport(input);
@@ -114,9 +114,9 @@ describe('summaryNode', () => {
           issues: [],
           healthyPods: [],
           nodeStatus: 'critical',
-          eventsSummary: [],
+          eventsSummary: []
         },
-        deepDiveFindings: [],
+        deepDiveFindings: []
       };
 
       const report = buildDiagnosticReport(input);
@@ -133,16 +133,14 @@ describe('summaryNode', () => {
               podName: 'error-pod',
               namespace: 'default',
               reason: 'CrashLoopBackOff',
-              severity: 'critical',
-            },
+              severity: 'critical'
+            }
           ],
           healthyPods: [],
           nodeStatus: 'healthy',
-          eventsSummary: [],
+          eventsSummary: []
         },
-        deepDiveFindings: [
-          '## Investigation: error-pod\nFatal error: Database connection failed at startup',
-        ],
+        deepDiveFindings: ['## Investigation: error-pod\nFatal error: Database connection failed at startup']
       };
 
       const report = buildDiagnosticReport(input);
