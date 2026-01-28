@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { analyzeTriageData, extractTriageIssues, type TriageData } from '../../../src/agents/nodes/triageNode';
 
 describe('triageNode', () => {
@@ -10,7 +10,7 @@ describe('triageNode', () => {
           namespace: 'default',
           status: 'Running',
           restarts: 0,
-          containers: [{ name: 'main', image: 'nginx', ready: true, state: 'Running' }],
+          containers: [{ name: 'main', image: 'nginx', ready: true, state: 'Running' }]
         },
         {
           name: 'crashing-pod',
@@ -23,10 +23,10 @@ describe('triageNode', () => {
               image: 'broken',
               ready: false,
               state: 'CrashLoopBackOff',
-              stateMessage: 'Back-off 5m0s restarting failed container',
-            },
-          ],
-        },
+              stateMessage: 'Back-off 5m0s restarting failed container'
+            }
+          ]
+        }
       ];
 
       const issues = extractTriageIssues(pods, [], []);
@@ -44,8 +44,8 @@ describe('triageNode', () => {
           namespace: 'default',
           status: 'Running',
           restarts: 5,
-          containers: [{ name: 'main', image: 'app', ready: true, state: 'Running' }],
-        },
+          containers: [{ name: 'main', image: 'app', ready: true, state: 'Running' }]
+        }
       ];
 
       const issues = extractTriageIssues(pods, [], []);
@@ -69,10 +69,10 @@ describe('triageNode', () => {
               type: 'PodScheduled',
               status: 'False',
               reason: 'Unschedulable',
-              message: 'Insufficient cpu',
-            },
-          ],
-        },
+              message: 'Insufficient cpu'
+            }
+          ]
+        }
       ];
 
       const issues = extractTriageIssues(pods, [], []);
@@ -89,8 +89,8 @@ describe('triageNode', () => {
           message: 'Container killed due to OOM',
           type: 'Warning',
           count: 3,
-          involvedObject: { kind: 'Pod', name: 'oom-pod', namespace: 'default' },
-        },
+          involvedObject: { kind: 'Pod', name: 'oom-pod', namespace: 'default' }
+        }
       ];
 
       const issues = extractTriageIssues([], [], events);
@@ -107,8 +107,8 @@ describe('triageNode', () => {
           reason: 'FailedMount',
           message: 'MountVolume.SetUp failed for volume "secret-vol"',
           type: 'Warning',
-          involvedObject: { kind: 'Pod', name: 'mount-fail-pod', namespace: 'default' },
-        },
+          involvedObject: { kind: 'Pod', name: 'mount-fail-pod', namespace: 'default' }
+        }
       ];
 
       const issues = extractTriageIssues([], [], events);
@@ -125,8 +125,8 @@ describe('triageNode', () => {
           namespace: 'default',
           status: 'Running',
           restarts: 10,
-          containers: [{ name: 'main', image: 'app', state: 'CrashLoopBackOff' }],
-        },
+          containers: [{ name: 'main', image: 'app', state: 'CrashLoopBackOff' }]
+        }
       ];
 
       const events = [
@@ -134,8 +134,8 @@ describe('triageNode', () => {
           reason: 'BackOff',
           message: 'Back-off restarting failed container',
           type: 'Warning',
-          involvedObject: { kind: 'Pod', name: 'problem-pod', namespace: 'default' },
-        },
+          involvedObject: { kind: 'Pod', name: 'problem-pod', namespace: 'default' }
+        }
       ];
 
       const issues = extractTriageIssues(pods, [], events);
@@ -152,9 +152,9 @@ describe('triageNode', () => {
           name: 'unhealthy-node',
           conditions: [
             { type: 'Ready', status: 'False', reason: 'KubeletNotReady' },
-            { type: 'MemoryPressure', status: 'True', message: 'High memory usage' },
-          ],
-        },
+            { type: 'MemoryPressure', status: 'True', message: 'High memory usage' }
+          ]
+        }
       ];
 
       const issues = extractTriageIssues([], nodes, []);
@@ -173,11 +173,11 @@ describe('triageNode', () => {
             namespace: 'default',
             status: 'Running',
             restarts: 10,
-            containers: [{ name: 'main', image: 'app', state: 'CrashLoopBackOff' }],
-          },
+            containers: [{ name: 'main', image: 'app', state: 'CrashLoopBackOff' }]
+          }
         ],
         nodes: [{ name: 'node-1', conditions: [{ type: 'Ready', status: 'True' }] }],
-        events: [],
+        events: []
       };
 
       const result = analyzeTriageData(data, 'default');
@@ -194,11 +194,11 @@ describe('triageNode', () => {
             namespace: 'default',
             status: 'Running',
             restarts: 0,
-            containers: [{ name: 'main', image: 'nginx', ready: true, state: 'Running' }],
-          },
+            containers: [{ name: 'main', image: 'nginx', ready: true, state: 'Running' }]
+          }
         ],
         nodes: [{ name: 'node-1', conditions: [{ type: 'Ready', status: 'True' }] }],
-        events: [],
+        events: []
       };
 
       const result = analyzeTriageData(data, 'default');
@@ -212,7 +212,7 @@ describe('triageNode', () => {
       const unhealthyData: TriageData = {
         pods: [],
         nodes: [{ name: 'bad-node', conditions: [{ type: 'Ready', status: 'False' }] }],
-        events: [],
+        events: []
       };
 
       const unhealthyResult = analyzeTriageData(unhealthyData, 'default');
@@ -221,7 +221,7 @@ describe('triageNode', () => {
       const healthyData: TriageData = {
         pods: [],
         nodes: [{ name: 'good-node', conditions: [{ type: 'Ready', status: 'True' }] }],
-        events: [],
+        events: []
       };
 
       const healthyResult = analyzeTriageData(healthyData, 'default');

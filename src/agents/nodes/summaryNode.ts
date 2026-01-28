@@ -61,34 +61,34 @@ function getNextSteps(issue: TriageIssue): string[] {
       'Check application logs for startup errors',
       'Verify environment variables and configuration',
       'Check if required services/dependencies are available',
-      'Review resource limits (CPU/memory)',
+      'Review resource limits (CPU/memory)'
     ],
     OOMKilled: [
       'Increase memory limits in pod specification',
       'Check for memory leaks in the application',
       'Profile memory usage under load',
-      'Consider horizontal scaling instead of vertical',
+      'Consider horizontal scaling instead of vertical'
     ],
     FailedMount: [
       'Verify the secret/configmap exists in the namespace',
       'Check RBAC permissions for the service account',
-      'Verify PVC is bound and available',
+      'Verify PVC is bound and available'
     ],
     ImagePullBackOff: [
       'Verify image name and tag are correct',
       'Check image registry credentials',
-      'Verify network access to container registry',
+      'Verify network access to container registry'
     ],
     Pending: [
       'Check node resource availability',
       'Review node selectors and taints/tolerations',
-      'Check PVC binding status',
+      'Check PVC binding status'
     ],
     HighRestartCount: [
       'Review recent changes to the deployment',
       'Check for liveness probe failures',
-      'Monitor application health metrics',
-    ],
+      'Monitor application health metrics'
+    ]
   };
 
   return nextSteps[reason] || ['Review pod events and logs for more details'];
@@ -150,10 +150,10 @@ export function buildDiagnosticReport(input: SummaryInput): DiagnosticReport {
       resource: {
         kind: 'Pod',
         name: issue.podName,
-        namespace: issue.namespace,
+        namespace: issue.namespace
       },
       suggestedCommands: getSuggestedCommands(issue),
-      nextSteps: getNextSteps(issue),
+      nextSteps: getNextSteps(issue)
     };
   });
 
@@ -161,7 +161,7 @@ export function buildDiagnosticReport(input: SummaryInput): DiagnosticReport {
   const healthyResources: HealthyResource[] = triageResult.healthyPods.map(podName => ({
     kind: 'Pod',
     name: podName,
-    status: 'Running',
+    status: 'Running'
   }));
 
   return {
@@ -169,7 +169,7 @@ export function buildDiagnosticReport(input: SummaryInput): DiagnosticReport {
     timestamp,
     summary,
     issues,
-    healthyResources,
+    healthyResources
   };
 }
 
@@ -178,17 +178,18 @@ export async function summaryNode(state: DiagnosticStateType): Promise<Partial<D
   const report = buildDiagnosticReport({
     namespace: state.namespace,
     triageResult: state.triageResult!,
-    deepDiveFindings: state.deepDiveFindings,
+    deepDiveFindings: state.deepDiveFindings
   });
 
   // Format the report as markdown
   const formattedReport = formatReport(report);
 
   // Log the formatted report
+  // eslint-disable-next-line no-console
   console.log(formattedReport);
 
   return {
     issues: report.issues,
-    healthyResources: report.healthyResources,
+    healthyResources: report.healthyResources
   };
 }
