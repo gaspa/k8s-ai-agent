@@ -1,58 +1,6 @@
 import { listPodsTool, listNodesTool, listEventsTool } from '../../tools/triageTools';
 import type { TriageIssue, TriageResult, DiagnosticStateType } from '../state';
-
-// Types for triage data
-export interface FilteredPod {
-  name: string;
-  namespace: string;
-  status: string;
-  restarts: number;
-  nodeName?: string;
-  containers: {
-    name: string;
-    image: string;
-    ready?: boolean;
-    state?: string;
-    stateMessage?: string;
-  }[];
-  conditions?: {
-    type: string;
-    status: string;
-    reason?: string;
-    message?: string;
-  }[];
-}
-
-export interface FilteredNode {
-  name: string;
-  conditions: {
-    type: string;
-    status: string;
-    reason?: string;
-    message?: string;
-  }[];
-  capacity?: Record<string, string>;
-  allocatable?: Record<string, string>;
-  taints?: { key: string; effect: string }[];
-}
-
-export interface FilteredEvent {
-  reason: string;
-  message: string;
-  type: string;
-  count?: number;
-  involvedObject: {
-    kind: string;
-    name: string;
-    namespace?: string;
-  };
-}
-
-export interface TriageData {
-  pods: FilteredPod[];
-  nodes: FilteredNode[];
-  events: FilteredEvent[];
-}
+import type { FilteredPod, FilteredNode, FilteredEvent, TriageData } from '../../types';
 
 // Critical reasons that require immediate investigation
 const CRITICAL_REASONS = ['CrashLoopBackOff', 'OOMKilled', 'FailedMount', 'ImagePullBackOff', 'ErrImagePull'];

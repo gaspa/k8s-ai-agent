@@ -1,25 +1,9 @@
 import { Annotation } from '@langchain/langgraph';
 import { BaseMessage } from '@langchain/core/messages';
 import type { DiagnosticIssue, HealthyResource } from '../types/report';
+import type { TriageIssue, TriageResult } from '../types/triage';
 
-// Represents an issue found during triage that needs investigation
-export interface TriageIssue {
-  podName: string;
-  namespace: string;
-  containerName?: string | undefined;
-  reason: string;
-  severity: 'critical' | 'warning';
-  restarts?: number | undefined;
-  message?: string | undefined;
-}
-
-// Represents triage results
-export interface TriageResult {
-  issues: TriageIssue[];
-  healthyPods: string[];
-  nodeStatus: 'healthy' | 'warning' | 'critical';
-  eventsSummary: string[];
-}
+export type { TriageIssue, TriageResult };
 
 // Define the state annotation for the diagnostic graph
 export const DiagnosticState = Annotation.Root({
