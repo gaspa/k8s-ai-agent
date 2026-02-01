@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { analyzeTriageData, extractTriageIssues, type TriageData } from '../../../src/agents/nodes/triageNode';
+import { analyzeTriageData, extractTriageIssues } from '../../../src/agents/nodes/triageNode';
+import type { TriageData } from '../../../src/types';
 
 describe('triageNode', () => {
   describe('extractTriageIssues', () => {

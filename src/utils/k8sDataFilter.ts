@@ -1,69 +1,12 @@
-interface FilterOptions {
-  onlyUnhealthy?: boolean;
-  onlyWarnings?: boolean;
-}
-
-interface ContainerStatus {
-  name: string;
-  ready?: boolean;
-  restartCount?: number;
-  state?: {
-    running?: { startedAt?: string };
-    waiting?: { reason?: string; message?: string };
-    terminated?: { reason?: string; exitCode?: number; message?: string };
-  };
-}
-
-interface PodCondition {
-  type: string;
-  status: string;
-  reason?: string;
-  message?: string;
-}
-
-interface FilteredContainer {
-  name: string;
-  image: string;
-  ready?: boolean | undefined;
-  state?: string;
-  stateMessage?: string;
-  resources?: {
-    requests?: Record<string, string>;
-    limits?: Record<string, string>;
-  };
-}
-
-interface FilteredPod {
-  name: string;
-  namespace: string;
-  status: string;
-  nodeName?: string;
-  restarts: number;
-  containers: FilteredContainer[];
-  conditions?: PodCondition[];
-}
-
-interface FilteredNode {
-  name: string;
-  capacity?: Record<string, string>;
-  allocatable?: Record<string, string>;
-  conditions: PodCondition[];
-  taints?: { key: string; effect: string; value?: string }[];
-}
-
-interface FilteredEvent {
-  reason: string;
-  message: string;
-  type: string;
-  count?: number;
-  involvedObject: {
-    kind: string;
-    name: string;
-    namespace?: string;
-  };
-  firstTimestamp?: string;
-  lastTimestamp?: string;
-}
+import type {
+  FilterOptions,
+  ContainerStatus,
+  PodCondition,
+  FilteredContainer,
+  FilteredPod,
+  FilteredNode,
+  FilteredEvent
+} from '../types/k8s';
 
 interface ContainerStateResult {
   state?: string;
