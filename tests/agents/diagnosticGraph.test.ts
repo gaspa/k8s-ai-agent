@@ -10,6 +10,13 @@ vi.mock('../../src/cluster/k8sClient', () => ({
   }
 }));
 
+// Mock the model provider so tests don't call the real LLM
+vi.mock('../../src/agents/modelProvider', () => ({
+  getChatModel: () => ({
+    invoke: vi.fn().mockResolvedValue({ content: 'Mock LLM analysis: check pod logs' })
+  })
+}));
+
 import { createDiagnosticGraph, shouldDeepDive } from '../../src/agents/diagnosticGraph';
 import { k8sCoreApi } from '../../src/cluster/k8sClient';
 
@@ -33,6 +40,7 @@ describe('diagnosticGraph', () => {
         },
         messages: [],
         deepDiveFindings: [],
+        llmAnalysis: '',
         issues: [],
         healthyResources: []
       };
@@ -47,6 +55,7 @@ describe('diagnosticGraph', () => {
         triageResult: { issues: [], healthyPods: ['healthy-pod'], nodeStatus: 'healthy' as const, eventsSummary: [] },
         messages: [],
         deepDiveFindings: [],
+        llmAnalysis: '',
         issues: [],
         healthyResources: []
       };

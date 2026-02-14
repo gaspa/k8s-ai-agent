@@ -23,7 +23,8 @@ describe('summaryNode', () => {
           nodeStatus: 'healthy',
           eventsSummary: []
         },
-        deepDiveFindings: ['## Investigation: crash-pod\nError: Connection refused']
+        deepDiveFindings: ['## Investigation: crash-pod\nError: Connection refused'],
+        llmAnalysis: ''
       };
 
       const report = buildDiagnosticReport(input);
@@ -45,7 +46,8 @@ describe('summaryNode', () => {
           nodeStatus: 'healthy',
           eventsSummary: []
         },
-        deepDiveFindings: []
+        deepDiveFindings: [],
+        llmAnalysis: ''
       };
 
       const report = buildDiagnosticReport(input);
@@ -72,7 +74,8 @@ describe('summaryNode', () => {
           nodeStatus: 'healthy',
           eventsSummary: []
         },
-        deepDiveFindings: []
+        deepDiveFindings: [],
+        llmAnalysis: ''
       };
 
       const report = buildDiagnosticReport(input);
@@ -99,7 +102,8 @@ describe('summaryNode', () => {
           nodeStatus: 'healthy',
           eventsSummary: []
         },
-        deepDiveFindings: []
+        deepDiveFindings: [],
+        llmAnalysis: ''
       };
 
       const report = buildDiagnosticReport(input);
@@ -116,12 +120,57 @@ describe('summaryNode', () => {
           nodeStatus: 'critical',
           eventsSummary: []
         },
-        deepDiveFindings: []
+        deepDiveFindings: [],
+        llmAnalysis: ''
       };
 
       const report = buildDiagnosticReport(input);
 
       expect(report.summary.toLowerCase()).toContain('node');
+    });
+
+    it('should include LLM analysis in the report when provided', () => {
+      const input: SummaryInput = {
+        namespace: 'default',
+        triageResult: {
+          issues: [
+            {
+              podName: 'crash-pod',
+              namespace: 'default',
+              reason: 'CrashLoopBackOff',
+              severity: 'critical'
+            }
+          ],
+          healthyPods: [],
+          nodeStatus: 'healthy',
+          eventsSummary: []
+        },
+        deepDiveFindings: [],
+        llmAnalysis: '**Root cause:** Database connection refused\n**Remediation:** Check DB service'
+      };
+
+      const report = buildDiagnosticReport(input);
+
+      expect(report.llmAnalysis).toContain('Root cause');
+      expect(report.llmAnalysis).toContain('Database connection refused');
+    });
+
+    it('should not include LLM analysis when empty', () => {
+      const input: SummaryInput = {
+        namespace: 'default',
+        triageResult: {
+          issues: [],
+          healthyPods: ['pod-1'],
+          nodeStatus: 'healthy',
+          eventsSummary: []
+        },
+        deepDiveFindings: [],
+        llmAnalysis: ''
+      };
+
+      const report = buildDiagnosticReport(input);
+
+      expect(report.llmAnalysis).toBeUndefined();
     });
 
     it('should include deep dive findings in issue description', () => {
@@ -140,7 +189,8 @@ describe('summaryNode', () => {
           nodeStatus: 'healthy',
           eventsSummary: []
         },
-        deepDiveFindings: ['## Investigation: error-pod\nFatal error: Database connection failed at startup']
+        deepDiveFindings: ['## Investigation: error-pod\nFatal error: Database connection failed at startup'],
+        llmAnalysis: ''
       };
 
       const report = buildDiagnosticReport(input);

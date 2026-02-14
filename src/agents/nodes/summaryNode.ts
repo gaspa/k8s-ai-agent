@@ -104,7 +104,7 @@ function findingsForPod(podName: string, findings: string[]): string {
 }
 
 export function buildDiagnosticReport(input: SummaryInput): DiagnosticReport {
-  const { namespace, triageResult, deepDiveFindings } = input;
+  const { namespace, triageResult, deepDiveFindings, llmAnalysis } = input;
   const timestamp = new Date().toISOString();
 
   // Build summary
@@ -167,7 +167,8 @@ export function buildDiagnosticReport(input: SummaryInput): DiagnosticReport {
     timestamp,
     summary,
     issues,
-    healthyResources
+    healthyResources,
+    llmAnalysis: llmAnalysis || undefined
   };
 }
 
@@ -176,7 +177,8 @@ export async function summaryNode(state: DiagnosticStateType): Promise<Partial<D
   const report = buildDiagnosticReport({
     namespace: state.namespace,
     triageResult: state.triageResult!,
-    deepDiveFindings: state.deepDiveFindings
+    deepDiveFindings: state.deepDiveFindings,
+    llmAnalysis: state.llmAnalysis
   });
 
   // Format the report as markdown

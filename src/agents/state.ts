@@ -30,6 +30,12 @@ export const DiagnosticState = Annotation.Root({
     default: () => []
   }),
 
+  // LLM analysis results (root-cause hypotheses and remediation steps)
+  llmAnalysis: Annotation<string>({
+    reducer: (_, y) => y,
+    default: () => ''
+  }),
+
   // Final report data
   issues: Annotation<DiagnosticIssue[]>({
     reducer: (x, y) => x.concat(y),
