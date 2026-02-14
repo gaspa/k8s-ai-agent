@@ -3,12 +3,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // Mock the k8s client
 vi.mock('../../src/cluster/k8sClient', () => ({
   k8sMetricsClient: {
-    getPodMetrics: vi.fn(),
-    getNodeMetrics: vi.fn()
+    getPodMetrics: vi.fn()
   }
 }));
 
-import { getPodMetricsTool, getNodeMetricsTool } from '../../src/tools/deepDiveTools';
+import { getPodMetricsTool } from '../../src/tools/deepDiveTools';
 import { k8sMetricsClient } from '../../src/cluster/k8sClient';
 
 describe('metricsTool', () => {
@@ -72,30 +71,6 @@ describe('metricsTool', () => {
 
       expect(result).toContain('Error');
       expect(result).toContain('metrics');
-    });
-  });
-
-  describe('getNodeMetricsTool', () => {
-    it('should return node metrics', async () => {
-      vi.mocked(k8sMetricsClient.getNodeMetrics).mockResolvedValue({
-        items: [
-          {
-            metadata: { name: 'node-1' },
-            usage: {
-              cpu: '2000m',
-              memory: '8Gi'
-            }
-          }
-        ]
-      } as any);
-
-      const result = await getNodeMetricsTool.invoke({});
-      const parsed = JSON.parse(result);
-
-      expect(parsed).toHaveLength(1);
-      expect(parsed[0].name).toBe('node-1');
-      expect(parsed[0].usage.cpu).toBe('2000m');
-      expect(parsed[0].usage.memory).toBe('8Gi');
     });
   });
 });

@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { formatReport, DiagnosticReport, IssueSeverity } from '../../src/utils/reportFormatter';
+import { formatReport } from '../../src/utils/reportFormatter';
+import type { DiagnosticReport } from '../../src/types/report';
+import { IssueSeverity } from '../../src/types/report';
 
 describe('reportFormatter', () => {
   describe('formatReport', () => {

@@ -1,8 +1,5 @@
-import { IssueSeverity, DiagnosticIssue, DiagnosticReport, HealthyResource } from '../types/report';
-
-// Re-export types for convenience
-export { IssueSeverity } from '../types/report';
-export type { DiagnosticIssue, DiagnosticReport, HealthyResource } from '../types/report';
+import type { DiagnosticIssue, DiagnosticReport, HealthyResource } from '../types/report';
+import { IssueSeverity } from '../types/report';
 
 function formatIssue(issue: DiagnosticIssue): string {
   const lines: string[] = [];
@@ -64,42 +61,21 @@ export function formatReport(report: DiagnosticReport): string {
   lines.push('');
   lines.push('---');
 
-  // Group issues by severity
-  const criticalIssues = report.issues.filter(i => i.severity === IssueSeverity.CRITICAL);
-  const warningIssues = report.issues.filter(i => i.severity === IssueSeverity.WARNING);
-  const infoIssues = report.issues.filter(i => i.severity === IssueSeverity.INFO);
+  // Render issue sections grouped by severity
+  const severitySections: { severity: IssueSeverity; title: string }[] = [
+    { severity: IssueSeverity.CRITICAL, title: 'Critical Issues' },
+    { severity: IssueSeverity.WARNING, title: 'Warnings' },
+    { severity: IssueSeverity.INFO, title: 'Info' }
+  ];
 
-  // Critical Issues
-  if (criticalIssues.length > 0) {
-    lines.push('');
-    lines.push('## Critical Issues');
-    lines.push('');
-    criticalIssues.forEach(issue => {
-      lines.push(formatIssue(issue));
-      lines.push('');
-    });
-  }
-
-  // Warnings
-  if (warningIssues.length > 0) {
-    lines.push('');
-    lines.push('## Warnings');
-    lines.push('');
-    warningIssues.forEach(issue => {
-      lines.push(formatIssue(issue));
-      lines.push('');
-    });
-  }
-
-  // Info
-  if (infoIssues.length > 0) {
-    lines.push('');
-    lines.push('## Info');
-    lines.push('');
-    infoIssues.forEach(issue => {
-      lines.push(formatIssue(issue));
-      lines.push('');
-    });
+  for (const { severity, title } of severitySections) {
+    const issues = report.issues.filter(i => i.severity === severity);
+    if (issues.length > 0) {
+      lines.push('', `## ${title}`, '');
+      issues.forEach(issue => {
+        lines.push(formatIssue(issue), '');
+      });
+    }
   }
 
   // LLM Analysis

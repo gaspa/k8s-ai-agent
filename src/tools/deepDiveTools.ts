@@ -3,7 +3,29 @@ import { z } from 'zod';
 import { k8sCoreApi, k8sMetricsClient } from '../cluster/k8sClient';
 import { getLogger } from '@fluidware-it/saddlebag';
 
-// Deep dive tools are "expensive" - they retrieve detailed data for specific resources
+// Extract a human-readable message from a K8s API error.
+// Tries multiple paths where the K8s client may place the error message.
+function extractK8sErrorMessage(e: any, fallbackContext: string): string {
+  // Try e.body (string containing JSON with a "message" field)
+  if (typeof e.body === 'string') {
+    try {
+      const parsed = JSON.parse(e.body);
+      if (parsed?.message) return parsed.message;
+      // JSON parsed but no message field — fall through to other strategies
+    } catch {
+      // Not valid JSON, return the raw string body
+      return e.body;
+    }
+  }
+
+  // Try e.response.body.message
+  if (e.response?.body?.message) return e.response.body.message;
+
+  // Try e.message
+  if (e.message) return e.message;
+
+  return `Unknown error for ${fallbackContext}`;
+}
 
 // Tool to read logs from a specific pod
 export const readPodLogsTool = tool(
@@ -22,8 +44,9 @@ export const readPodLogsTool = tool(
       if (e.response?.statusCode === 404 || e.response?.body?.message?.includes('previous terminated container')) {
         return `No previous logs found for pod ${podName}. Try reading current logs.`;
       }
-      getLogger().error(`Error reading pod ${namespace}:${podName} logs`);
-      return `Error while reading pod ${podName} logs: ${JSON.stringify(e)}`;
+      const msg = extractK8sErrorMessage(e, podName);
+      getLogger().error(`Error reading pod ${namespace}:${podName} logs: ${msg}`);
+      return `Logs unavailable for ${podName}: ${msg}`;
     }
   },
   {
@@ -86,33 +109,3 @@ export const getPodMetricsTool = tool(
     })
   }
 );
-
-// Tool to get node metrics from metrics-server
-export const getNodeMetricsTool = tool(
-  async () => {
-    try {
-      const metrics = await k8sMetricsClient.getNodeMetrics();
-
-      const result = metrics.items.map(m => ({
-        name: m.metadata?.name,
-        usage: {
-          cpu: m.usage.cpu,
-          memory: m.usage.memory
-        }
-      }));
-
-      return JSON.stringify(result);
-    } catch (e: any) {
-      getLogger().error(`Error retrieving node metrics: ${e.message}`);
-      return `Error retrieving node metrics: ${e.message}. Is metrics-server installed?`;
-    }
-  },
-  {
-    name: 'get_node_metrics',
-    description: 'Gets current CPU and memory usage for cluster nodes from the Kubernetes metrics-server.',
-    schema: z.object({})
-  }
-);
-
-// Export all deep dive tools as an array for easy use
-export const deepDiveTools = [readPodLogsTool, getPodMetricsTool, getNodeMetricsTool];

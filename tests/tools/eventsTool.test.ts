@@ -7,7 +7,7 @@ vi.mock('../../src/cluster/k8sClient', () => ({
   }
 }));
 
-import { listEventsTool } from '../../src/tools/k8sTools';
+import { listEventsTool } from '../../src/tools/triageTools';
 import { k8sCoreApi } from '../../src/cluster/k8sClient';
 
 describe('listEventsTool', () => {
