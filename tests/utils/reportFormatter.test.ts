@@ -171,6 +171,44 @@ describe('reportFormatter', () => {
       expect(formatted).toContain('Check application logs');
       expect(formatted).toContain('Review resource limits');
     });
+
+    it('should render LLM analysis section when present', () => {
+      const report: DiagnosticReport = {
+        namespace: 'default',
+        timestamp: '2024-01-01T00:00:00Z',
+        summary: 'Found 1 issue',
+        issues: [
+          {
+            severity: IssueSeverity.CRITICAL,
+            title: 'CrashLoopBackOff',
+            description: 'Pod is crashing',
+            resource: { kind: 'Pod', name: 'app-1' }
+          }
+        ],
+        healthyResources: [],
+        llmAnalysis: '**Root cause:** Database connection refused\n**Fix:** Restart the DB pod'
+      };
+
+      const formatted = formatReport(report);
+
+      expect(formatted).toContain('## Analysis & Proposed Solutions');
+      expect(formatted).toContain('Database connection refused');
+      expect(formatted).toContain('Restart the DB pod');
+    });
+
+    it('should not render LLM analysis section when absent', () => {
+      const report: DiagnosticReport = {
+        namespace: 'default',
+        timestamp: '2024-01-01T00:00:00Z',
+        summary: 'Healthy',
+        issues: [],
+        healthyResources: []
+      };
+
+      const formatted = formatReport(report);
+
+      expect(formatted).not.toContain('## Analysis & Proposed Solutions');
+    });
   });
 
   describe('DiagnosticIssue', () => {

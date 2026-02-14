@@ -4,4 +4,5 @@ export interface SummaryInput {
   namespace: string;
   triageResult: TriageResult;
   deepDiveFindings: string[];
+  llmAnalysis: string;
 }

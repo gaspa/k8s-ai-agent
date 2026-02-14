@@ -102,6 +102,14 @@ export function formatReport(report: DiagnosticReport): string {
     });
   }
 
+  // LLM Analysis
+  if (report.llmAnalysis) {
+    lines.push('');
+    lines.push('## Analysis & Proposed Solutions');
+    lines.push('');
+    lines.push(report.llmAnalysis);
+  }
+
   // Healthy Resources
   if (report.healthyResources.length > 0) {
     lines.push('');

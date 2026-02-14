@@ -23,6 +23,7 @@ export interface DiagnosticIssue {
   resource: ResourceReference;
   suggestedCommands?: string[];
   nextSteps?: string[];
+  proposedSolution?: string;
 }
 
 export interface DiagnosticReport {
@@ -31,4 +32,5 @@ export interface DiagnosticReport {
   summary: string;
   issues: DiagnosticIssue[];
   healthyResources: HealthyResource[];
+  llmAnalysis?: string;
 }
